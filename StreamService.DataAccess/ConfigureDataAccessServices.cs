@@ -28,6 +28,7 @@ public static class ConfigureDataAccessServices
         // Geçici olarak bu satırı kaldırıyoruz, gerekli tipler oluşturulduğunda eklenebilir
         services.AddScoped<IUserDal, UserDal>();
         services.AddScoped<IStreamInformationDal, StreamInformationDal>();
+        services.AddScoped<IRoleDal, RoleDal>();
 
         return services;
     }

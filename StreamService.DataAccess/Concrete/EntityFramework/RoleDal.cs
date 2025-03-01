@@ -1,4 +1,3 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 using StreamService.Core.DataAccess.Concrete;
 using StreamService.DataAccess.Abstract;
@@ -7,12 +6,12 @@ using StreamService.Entities.Concrete;
 
 namespace StreamService.DataAccess.Concrete.EntityFramework;
 
-public class UserDal(MongoDbContext context) : EntityRepositoryBase<User, MongoDbContext>(context), IUserDal
+public class RoleDal(MongoDbContext context) : EntityRepositoryBase<Role, MongoDbContext>(context), IRoleDal
 {
     private readonly MongoDbContext _context = context;
 
-    public async Task<User> GetByEmailAsync(string email)
+    public async Task<Role> GetByNameAsync(string name)
     {
-        return await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
+        return await _context.Roles.Where(r => r.Name == name).FirstOrDefaultAsync();
     }
 }

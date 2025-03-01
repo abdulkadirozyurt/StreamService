@@ -4,4 +4,7 @@ using StreamService.Entities.Concrete;
 
 namespace StreamService.DataAccess.Abstract;
 
-public interface IUserDal : IEntityRepository<User> { }
+public interface IUserDal : IEntityRepository<User>
+{
+    Task<User> GetByEmailAsync(string email);
+}

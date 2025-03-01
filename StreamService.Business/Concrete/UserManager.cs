@@ -1,4 +1,10 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using StreamService.Business.Abstract;
 using StreamService.Core.Business.Concrete;
 using StreamService.Core.DataAccess.Abstract;
@@ -7,7 +13,87 @@ using StreamService.Entities.Concrete;
 
 namespace StreamService.Business.Concrete;
 
-public class UserManager(IUserDal userDal) : EntityManagerBase<User>(userDal), IUserService
+public class UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRoleDal roleDal) : EntityManagerBase<User>(userDal), IUserService
 {
     private readonly IUserDal _userDal = userDal;
+    private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
+    private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
+    private readonly IRoleDal _roleDal = roleDal;
+
+    public async Task<User> RegisterAsync(string firstName, string lastName, string email, string password)
+    {
+        var existingUser = await _userDal.GetByEmailAsync(email);
+        if (existingUser != null)
+        {
+            throw new Exception("User already exists");
+        }
+        var user = new User
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            Password = _passwordHasher.HashPassword(new User(), password),
+            Membership = null,
+        };
+
+        var userRole = new UserRole { User = user, Role = await _roleDal.GetByNameAsync("User") };
+
+        user.UserRoles.Add(userRole);
+
+        await _userDal.CreateAsync(user);
+        return user;
+    }
+
+    public async Task<string> LoginAsync(string email, string password)
+    {
+        // E-posta ile kullanıcıyı bul
+        var user = await _userDal.GetByEmailAsync(email);
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+
+        // Şifreyi doğrula
+        var isPasswordValid = await ValidatePasswordAsync(email, password);
+        if (!isPasswordValid)
+        {
+            throw new Exception("Invalid password.");
+        }
+
+        // Şifre doğruysa, JWT token oluştur (veya başka bir erişim belirteci)
+        var token = _tokenGenerator.GenerateToken(user);
+
+        return token;
+    }
+
+    public async Task<bool> ValidatePasswordAsync(string email, string password)
+    {
+        var user = await _userDal.GetByEmailAsync(email);
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+
+        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
+
+        return result == PasswordVerificationResult.Success;
+    }
+
+    public async Task UpdatePasswordAsync(string email, string oldPassword, string newPassword)
+    {
+        var user = await _userDal.GetByEmailAsync(email);
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+
+        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, oldPassword);
+        if (result != PasswordVerificationResult.Success)
+        {
+            throw new Exception("Old password is incorrect.");
+        }
+
+        user.Password = _passwordHasher.HashPassword(user, newPassword);
+        await _userDal.UpdateAsync(user);
+    }
 }

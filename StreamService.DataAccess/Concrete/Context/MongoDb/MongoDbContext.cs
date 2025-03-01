@@ -12,6 +12,9 @@ public class MongoDbContext(DbContextOptions<MongoDbContext> options, MongoDbSet
 
     public DbSet<StreamInformation> StreamInformations { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Membership> Memberships { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,5 +22,10 @@ public class MongoDbContext(DbContextOptions<MongoDbContext> options, MongoDbSet
 
         modelBuilder.Entity<User>().ToCollection("users");
         modelBuilder.Entity<StreamInformation>().ToCollection("streamInformations");
+        modelBuilder.Entity<Membership>().ToCollection("memberships");
+        modelBuilder.Entity<Role>().ToCollection("roles");
+        modelBuilder.Entity<UserRole>().ToCollection("userRoles");
+
+        modelBuilder.Entity<User>().HasOne(u => u.Membership).WithMany(m => m.Users).HasForeignKey(u => u.MembershipId).IsRequired(false);
     }
 }
