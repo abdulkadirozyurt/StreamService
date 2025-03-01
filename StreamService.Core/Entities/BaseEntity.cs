@@ -8,15 +8,14 @@ namespace StreamService.Core.Entities;
 
 public abstract class BaseEntity
 {
-    [Key] 
     [BsonId] 
-    [BsonRepresentation(BsonType.ObjectId)] // MongoDB'de ObjectId olarak kullan�lacak, c#'ta string olarak kullan�lacak
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // SQL i�in ID'nin otomatik artmas�n� sa�lar
-    public string Id { get; set; } = Guid.NewGuid().ToString(); // Varsay�lan olarak GUID kullan�l�r
+    [BsonRepresentation(BsonType.ObjectId)] // MongoDB'de ObjectId olarak kullanılacak, c#'ta string olarak kullanılacak
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // SQL için ID'nin otomatik artmasını sağlar
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString(); // Varsayılan olarak ObjectId kullanılır
 
     [BsonElement("createdAt")]
     [BsonRepresentation(BsonType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Varsay�lan de�er ekle
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow; 
 
     [BsonElement("updatedAt")]
     [BsonRepresentation(BsonType.DateTime)]

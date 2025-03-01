@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.13" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\StreamService.Core\StreamService.Core.csproj" />
     <ProjectReference Include="..\StreamService.DataAccess\StreamService.DataAccess.csproj" />
     <ProjectReference Include="..\StreamService.Entities\StreamService.Entities.csproj" />
