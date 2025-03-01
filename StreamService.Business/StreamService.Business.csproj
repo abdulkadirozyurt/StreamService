@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\StreamService.Core\StreamService.Core.csproj" />
+    <ProjectReference Include="..\StreamService.DataAccess\StreamService.DataAccess.csproj" />
+    <ProjectReference Include="..\StreamService.Entities\StreamService.Entities.csproj" />
+  </ItemGroup>
+
 </Project>
