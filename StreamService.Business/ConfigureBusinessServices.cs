@@ -14,6 +14,7 @@ public static class ConfigureBusinessServices
     public static IServiceCollection RegisterBusinessServices(this IServiceCollection services)
     {
         services.AddScoped<IUserService, UserManager>();
+        services.AddScoped<ITokenService, TokenManager>();
         // services.AddScoped<IStreamInformationBusiness, StreamInformationBusiness>();
 
         return services;

@@ -10,6 +10,7 @@ using StreamService.Core.Middleware;
 using StreamService.DataAccess;
 using StreamService.DataAccess.Abstract;
 using StreamService.DataAccess.Concrete.Context.MongoDb;
+using StreamService.DataAccess.Concrete.EntityFramework;
 using StreamService.Entities.Concrete;
 using StreamService.Entities.Enums;
 

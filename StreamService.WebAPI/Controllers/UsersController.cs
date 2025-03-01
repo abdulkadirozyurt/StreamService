@@ -13,12 +13,12 @@ namespace StreamService.WebAPI.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
-    private readonly ITokenGenerator _tokenGenerator;
+    private readonly ITokenService _tokenService;
 
-    public UsersController(IUserService userService, ITokenGenerator tokenGenerator)
+    public UsersController(IUserService userService, ITokenService tokenService)
     {
         _userService = userService;
-        _tokenGenerator = tokenGenerator;
+        _tokenService = tokenService;
     }
 
     [HttpGet]
@@ -124,5 +124,23 @@ public class UsersController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+    {
+        var token = _tokenService.GetRefreshToken(refreshToken);
+
+        if (token == null || !token.IsActive)
+            return Unauthorized("Invalid or expired refresh token");
+
+        var user = await _userService.GetByIdAsync(token.UserId);
+        var newAccessToken = _tokenService.GenerateAccessToken(user);
+        var newRefreshToken = _tokenService.GenerateRefreshToken(user);
+
+        _tokenService.RevokeRefreshToken(token);
+        _tokenService.SaveRefreshToken(newRefreshToken);
+
+        return Ok(new { AccessToken = newAccessToken, RefreshToken = newRefreshToken.Token });
     }
 }
