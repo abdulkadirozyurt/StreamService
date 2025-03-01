@@ -1,31 +1,37 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using StreamService.Business.Abstract;
 using StreamService.Entities.Concrete;
+using StreamService.Entities.Dtos.User;
 
 namespace StreamService.WebAPI.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/users")]
 [ApiController]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly ITokenGenerator _tokenGenerator;
 
-    public UsersController(IUserService userService)
+    public UsersController(IUserService userService, ITokenGenerator tokenGenerator)
     {
         _userService = userService;
+        _tokenGenerator = tokenGenerator;
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()
     {
         var users = await _userService.GetAllAsync();
         return Ok(users);
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
+    [HttpGet("id")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetById([FromQuery] string id)
     {
         if (!ObjectId.TryParse(id, out _))
         {
@@ -39,16 +45,9 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create(User user)
-    {
-        user.Id = ObjectId.GenerateNewId().ToString();
-        await _userService.CreateAsync(user);
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, User user)
+    [HttpPut("id")]
+    [Authorize(Roles = "Admin,User")]
+    public async Task<IActionResult> Update([FromQuery] string id, User user)
     {
         if (id != user.Id)
         {
@@ -62,8 +61,9 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    [HttpDelete("id")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete([FromQuery] string id)
     {
         if (!ObjectId.TryParse(id, out _))
         {
@@ -76,5 +76,53 @@ public class UsersController : ControllerBase
         }
         await _userService.DeleteAsync(id);
         return NoContent();
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
+    {
+        try
+        {
+            var user = await _userService.RegisterAsync(
+                userRegisterDto.FirstName,
+                userRegisterDto.LastName,
+                userRegisterDto.Email,
+                userRegisterDto.Password
+            );
+            return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
+    {
+        try
+        {
+            var token = await _userService.LoginAsync(userLoginDto.Email, userLoginDto.Password);
+            return Ok(new { Token = token });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("update-password")]
+    [Authorize(Roles = "Admin,User")]
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto updatePasswordDto)
+    {
+        try
+        {
+            await _userService.UpdatePasswordAsync(updatePasswordDto.Email, updatePasswordDto.OldPassword, updatePasswordDto.NewPassword);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
