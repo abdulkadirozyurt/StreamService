@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 using StreamService.Business.Abstract;
 using StreamService.Core.Business.Concrete;
 using StreamService.Core.DataAccess.Abstract;
@@ -13,12 +14,23 @@ using StreamService.Entities.Concrete;
 
 namespace StreamService.Business.Concrete;
 
-public class UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRoleDal roleDal) : EntityManagerBase<User>(userDal), IUserService
+public class UserManager : EntityManagerBase<User>, IUserService
 {
-    private readonly IUserDal _userDal = userDal;
-    private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
-    private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
-    private readonly IRoleDal _roleDal = roleDal;
+    private readonly IUserDal _userDal;
+    private readonly PasswordHasher<User> _passwordHasher;
+    private readonly ITokenGenerator _tokenGenerator;
+    private readonly IRoleDal _roleDal;
+    private readonly IUserRoleDal _userRoleDal;
+
+    public UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRoleDal roleDal, IUserRoleDal userRoleDal)
+        : base(userDal)
+    {
+        _userDal = userDal;
+        _passwordHasher = new PasswordHasher<User>();
+        _tokenGenerator = tokenGenerator;
+        _roleDal = roleDal;
+        _userRoleDal = userRoleDal;
+    }
 
     public async Task<User> RegisterAsync(string firstName, string lastName, string email, string password)
     {
@@ -27,8 +39,16 @@ public class UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRole
         {
             throw new Exception("User already exists");
         }
+
+        var role = await _roleDal.GetByNameAsync("User");
+        if (role == null)
+        {
+            throw new Exception("Role 'User' not found.");
+        }
+
         var user = new User
         {
+            Id = ObjectId.GenerateNewId().ToString(),
             FirstName = firstName,
             LastName = lastName,
             Email = email,
@@ -36,31 +56,38 @@ public class UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRole
             Membership = null,
         };
 
-        var userRole = new UserRole { User = user, Role = await _roleDal.GetByNameAsync("User") };
+        var userRole = new UserRole
+        {
+            UserId = user.Id,
+            RoleId = role.Id,
+            User = user,
+            Role = role,
+        };
 
         user.UserRoles.Add(userRole);
 
         await _userDal.CreateAsync(user);
+        Console.WriteLine($"Generated User Id: {user.Id}");
+
         return user;
     }
 
     public async Task<string> LoginAsync(string email, string password)
     {
-        // E-posta ile kullanıcıyı bul
         var user = await _userDal.GetByEmailAsync(email);
         if (user == null)
         {
             throw new Exception("User not found.");
         }
 
-        // Şifreyi doğrula
         var isPasswordValid = await ValidatePasswordAsync(email, password);
         if (!isPasswordValid)
         {
             throw new Exception("Invalid password.");
         }
 
-        // Şifre doğruysa, JWT token oluştur (veya başka bir erişim belirteci)
+        user.UserRoles = await _userRoleDal.GetByUserIdAsync(user.Id);
+
         var token = _tokenGenerator.GenerateToken(user);
 
         return token;

@@ -12,6 +12,6 @@ public class RoleDal(MongoDbContext context) : EntityRepositoryBase<Role, MongoD
 
     public async Task<Role> GetByNameAsync(string name)
     {
-        return await _context.Roles.Where(r => r.Name == name).FirstOrDefaultAsync();
+        return await _context.Roles.Where(role => role.Name.ToString() == name).FirstOrDefaultAsync();
     }
 }

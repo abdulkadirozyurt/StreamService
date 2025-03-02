@@ -28,12 +28,12 @@ public abstract class EntityRepositoryBase<TEntity, TContext>(TContext context) 
         return true;
     }
 
-    public async Task<List<TEntity>> GetAllAsync()
+    public virtual async Task<List<TEntity>> GetAllAsync()
     {
         return await _context.Set<TEntity>().ToListAsync();
     }
 
-    public async Task<TEntity> GetByIdAsync(string id)
+    public virtual async Task<TEntity> GetByIdAsync(string id)
     {
         var entity = await _context.Set<TEntity>().FindAsync(id);
         if (entity == null)

@@ -1,3 +1,5 @@
+using StreamService.Entities.Concrete;
+
 namespace StreamService.Entities.Dtos.User
 {
     public class UserRegisterDto

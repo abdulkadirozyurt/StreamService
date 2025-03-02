@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using StreamService.Business.Abstract;
 using StreamService.Business.Concrete;
+using StreamService.DataAccess.Abstract;
+using StreamService.DataAccess.Concrete.EntityFramework;
 
 namespace StreamService.Business;
 
@@ -15,6 +17,8 @@ public static class ConfigureBusinessServices
     {
         services.AddScoped<IUserService, UserManager>();
         services.AddScoped<ITokenService, TokenManager>();
+        services.AddScoped<ITokenGenerator, TokenGenerator>();
+        services.AddScoped<IUserRoleDal, UserRoleDal>(); // Bu satırı ekleyin
         // services.AddScoped<IStreamInformationBusiness, StreamInformationBusiness>();
 
         return services;

@@ -29,5 +29,11 @@ public class MongoDbContext(DbContextOptions<MongoDbContext> options, MongoDbSet
         modelBuilder.Entity<StreamInformation>().ToCollection("streamInformations");
 
         modelBuilder.Entity<User>().HasOne(u => u.Membership).WithMany(m => m.Users).HasForeignKey(u => u.MembershipId).IsRequired(false);
+
+        // User ve UserRole arasındaki ilişkiyi tanımlama
+        modelBuilder.Entity<User>().HasMany(u => u.UserRoles).WithOne(ur => ur.User).HasForeignKey(ur => ur.UserId);
+
+        // Role ve UserRole arasındaki ilişkiyi tanımlama
+        modelBuilder.Entity<Role>().HasMany(r => r.UserRoles).WithOne(ur => ur.Role).HasForeignKey(ur => ur.RoleId);
     }
 }
