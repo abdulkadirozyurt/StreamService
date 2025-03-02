@@ -12,6 +12,15 @@ public class RoleDal(MongoDbContext context) : EntityRepositoryBase<Role, MongoD
 
     public async Task<Role> GetByNameAsync(string name)
     {
-        return await _context.Roles.Where(role => role.Name.ToString() == name).FirstOrDefaultAsync();
+        var role = await _context.Roles.Where(role => role.Name.ToString() == name).FirstOrDefaultAsync();
+        if (role == null)
+        {
+            // Log the error for debugging
+            Console.WriteLine($"Role not found: {name}");
+            // Hata fırlatmak yerine null döndür
+            return null;
+        }
+        return role;
     }
+
 }

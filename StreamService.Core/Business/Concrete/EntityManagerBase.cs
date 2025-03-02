@@ -25,12 +25,12 @@ public abstract class EntityManagerBase<TEntity>(IEntityRepository<TEntity> enti
         return _entityRepository.DeleteAsync(id);
     }
 
-    public Task<List<TEntity>> GetAllAsync()
+    public virtual Task<List<TEntity>> GetAllAsync()
     {
         return _entityRepository.GetAllAsync();
     }
 
-    public Task<TEntity> GetByIdAsync(string id)
+    public virtual Task<TEntity> GetByIdAsync(string id)
     {
         return _entityRepository.GetByIdAsync(id);
     }

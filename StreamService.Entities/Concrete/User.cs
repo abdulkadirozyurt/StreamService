@@ -36,6 +36,9 @@ public class User : BaseEntity
 
     public List<StreamInformation>? StreamInformations { get; set; }
 
-    [BsonElement("userRoles")]
-    public List<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string RoleId { get; set; } = default!;
+
+    [BsonIgnore]
+    public Role Role { get; set; } = default!;
 }

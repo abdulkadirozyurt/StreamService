@@ -1,8 +1,4 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using StreamService.Business;
 using StreamService.Business.Abstract;
 using StreamService.Business.Concrete;
@@ -12,7 +8,7 @@ using StreamService.DataAccess.Abstract;
 using StreamService.DataAccess.Concrete.Context.MongoDb;
 using StreamService.DataAccess.Concrete.EntityFramework;
 using StreamService.Entities.Concrete;
-using StreamService.Entities.Enums;
+using StreamService.Core.Entities.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -21,9 +17,9 @@ var configuration = builder.Configuration;
 
 builder
     .Services.AddControllers()
-    .AddJsonOptions(options =>
+    .AddNewtonsoftJson(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -49,11 +45,13 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var roleDal = services.GetRequiredService<IRoleDal>();
 
-    foreach (RoleType roleType in Enum.GetValues(typeof(RoleType)))
+    var roles = new List<string> { UserRoleConstants.Admin, UserRoleConstants.User };
+
+    foreach (var roleName in roles)
     {
-        if (await roleDal.GetByNameAsync(roleType.ToString()) == null)
+        if (await roleDal.GetByNameAsync(roleName) == null)
         {
-            await roleDal.CreateAsync(new Role { Name = roleType });
+            await roleDal.CreateAsync(new Role { Name = roleName });
         }
     }
 }

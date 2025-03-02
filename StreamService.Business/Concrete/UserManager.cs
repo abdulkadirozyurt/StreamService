@@ -9,6 +9,7 @@ using MongoDB.Bson;
 using StreamService.Business.Abstract;
 using StreamService.Core.Business.Concrete;
 using StreamService.Core.DataAccess.Abstract;
+using StreamService.Core.Entities.Constants;
 using StreamService.DataAccess.Abstract;
 using StreamService.Entities.Concrete;
 
@@ -20,16 +21,14 @@ public class UserManager : EntityManagerBase<User>, IUserService
     private readonly PasswordHasher<User> _passwordHasher;
     private readonly ITokenGenerator _tokenGenerator;
     private readonly IRoleDal _roleDal;
-    private readonly IUserRoleDal _userRoleDal;
 
-    public UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRoleDal roleDal, IUserRoleDal userRoleDal)
+    public UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRoleDal roleDal)
         : base(userDal)
     {
         _userDal = userDal;
         _passwordHasher = new PasswordHasher<User>();
         _tokenGenerator = tokenGenerator;
         _roleDal = roleDal;
-        _userRoleDal = userRoleDal;
     }
 
     public async Task<User> RegisterAsync(string firstName, string lastName, string email, string password)
@@ -40,7 +39,7 @@ public class UserManager : EntityManagerBase<User>, IUserService
             throw new Exception("User already exists");
         }
 
-        var role = await _roleDal.GetByNameAsync("User");
+        var role = await _roleDal.GetByNameAsync(UserRoleConstants.User);
         if (role == null)
         {
             throw new Exception("Role 'User' not found.");
@@ -54,17 +53,9 @@ public class UserManager : EntityManagerBase<User>, IUserService
             Email = email,
             Password = _passwordHasher.HashPassword(new User(), password),
             Membership = null,
-        };
-
-        var userRole = new UserRole
-        {
-            UserId = user.Id,
             RoleId = role.Id,
-            User = user,
             Role = role,
         };
-
-        user.UserRoles.Add(userRole);
 
         await _userDal.CreateAsync(user);
         Console.WriteLine($"Generated User Id: {user.Id}");
@@ -86,7 +77,7 @@ public class UserManager : EntityManagerBase<User>, IUserService
             throw new Exception("Invalid password.");
         }
 
-        user.UserRoles = await _userRoleDal.GetByUserIdAsync(user.Id);
+        user.Role = await _roleDal.GetByIdAsync(user.RoleId);
 
         var token = _tokenGenerator.GenerateToken(user);
 
@@ -122,5 +113,26 @@ public class UserManager : EntityManagerBase<User>, IUserService
 
         user.Password = _passwordHasher.HashPassword(user, newPassword);
         await _userDal.UpdateAsync(user);
+    }
+
+    public override async Task<List<User>> GetAllAsync()
+    {
+        var users = await _userDal.GetAllAsync();
+        foreach (var user in users)
+        {
+            user.Role = await _roleDal.GetByIdAsync(user.RoleId);
+        }
+        return users;
+    }
+
+    public override async Task<User> GetByIdAsync(string id)
+    {
+        var user = await _userDal.GetByIdAsync(id);
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+        user.Role = await _roleDal.GetByIdAsync(user.RoleId);
+        return user;
     }
 }

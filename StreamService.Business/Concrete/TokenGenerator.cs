@@ -20,6 +20,11 @@ public class TokenGenerator : ITokenGenerator
 
     public string GenerateToken(User user)
     {
+        if (user.Role == null)
+        {
+            throw new InvalidOperationException("User does not have a role assigned.");
+        }
+
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("SecretKey is not configured.");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -28,11 +33,9 @@ public class TokenGenerator : ITokenGenerator
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.Role, user.Role.Name.ToString()),
         };
-
-        // Add user roles to claims
-        claims.AddRange(user.UserRoles.Select(ur => new Claim(ClaimTypes.Role, ur.Role.Name.ToString())));
 
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],
