@@ -18,7 +18,7 @@ public static class ConfigureBusinessServices
         services.AddScoped<IUserService, UserManager>();
         services.AddScoped<ITokenService, TokenManager>();
         services.AddScoped<ITokenGenerator, TokenGenerator>();
-        // services.AddScoped<IStreamInformationBusiness, StreamInformationBusiness>();
+        services.AddHostedService<RoleSeederHostedService>();
 
         return services;
     }

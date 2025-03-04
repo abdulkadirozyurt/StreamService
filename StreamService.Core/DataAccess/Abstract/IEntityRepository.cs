@@ -10,5 +10,6 @@ public interface IEntityRepository<TEntity>
     Task<TEntity> GetByIdAsync(string id);
     Task<TEntity> CreateAsync(TEntity entity);
     Task<TEntity> UpdateAsync(TEntity entity);
-    Task<bool> DeleteAsync(string id);
+    Task<bool> DeactivateAsync(string id);
+    Task<bool> ActivateAsync(string id);
 }

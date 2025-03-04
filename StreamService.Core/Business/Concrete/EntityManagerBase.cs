@@ -15,16 +15,6 @@ public abstract class EntityManagerBase<TEntity>(IEntityRepository<TEntity> enti
 {
     private readonly IEntityRepository<TEntity> _entityRepository = entityRepository;
 
-    public Task<TEntity> CreateAsync(TEntity entity)
-    {
-        return _entityRepository.CreateAsync(entity);
-    }
-
-    public Task<bool> DeleteAsync(string id)
-    {
-        return _entityRepository.DeleteAsync(id);
-    }
-
     public virtual Task<List<TEntity>> GetAllAsync()
     {
         return _entityRepository.GetAllAsync();
@@ -35,8 +25,23 @@ public abstract class EntityManagerBase<TEntity>(IEntityRepository<TEntity> enti
         return _entityRepository.GetByIdAsync(id);
     }
 
+    public Task<TEntity> CreateAsync(TEntity entity)
+    {
+        return _entityRepository.CreateAsync(entity);
+    }
+
     public Task<TEntity> UpdateAsync(TEntity entity)
     {
         return _entityRepository.UpdateAsync(entity);
+    }
+
+    public async Task<bool> DeactivateAsync(string id)
+    {
+        return await _entityRepository.DeactivateAsync(id);
+    }
+
+    public Task<bool> ActivateAsync(string id)
+    {
+        return _entityRepository.ActivateAsync(id);
     }
 }

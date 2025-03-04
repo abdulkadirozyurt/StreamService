@@ -22,7 +22,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()
     {
         var users = await _userService.GetAllAsync();
@@ -69,12 +69,27 @@ public class UsersController : ControllerBase
         {
             return BadRequest("Invalid ID format.");
         }
-        var user = await _userService.GetByIdAsync(id);
-        if (user == null)
+        var result = await _userService.DeactivateAsync(id);
+        if (!result)
         {
             return NotFound();
         }
-        await _userService.DeleteAsync(id);
+        return NoContent();
+    }
+
+    [HttpPut("deactivate/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Deactivate([FromRoute] string id)
+    {
+        if (!ObjectId.TryParse(id, out _))
+        {
+            return BadRequest("Invalid ID format.");
+        }
+        var result = await _userService.DeactivateAsync(id);
+        if (!result)
+        {
+            return NotFound();
+        }
         return NoContent();
     }
 

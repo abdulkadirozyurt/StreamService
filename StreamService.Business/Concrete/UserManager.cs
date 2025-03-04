@@ -15,28 +15,19 @@ using StreamService.Entities.Concrete;
 
 namespace StreamService.Business.Concrete;
 
-public class UserManager : EntityManagerBase<User>, IUserService
+public class UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRoleDal roleDal) : EntityManagerBase<User>(userDal), IUserService
 {
-    private readonly IUserDal _userDal;
-    private readonly PasswordHasher<User> _passwordHasher;
-    private readonly ITokenGenerator _tokenGenerator;
-    private readonly IRoleDal _roleDal;
-
-    public UserManager(IUserDal userDal, ITokenGenerator tokenGenerator, IRoleDal roleDal)
-        : base(userDal)
-    {
-        _userDal = userDal;
-        _passwordHasher = new PasswordHasher<User>();
-        _tokenGenerator = tokenGenerator;
-        _roleDal = roleDal;
-    }
+    private readonly IUserDal _userDal = userDal;
+    private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
+    private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
+    private readonly IRoleDal _roleDal = roleDal;
 
     public async Task<User> RegisterAsync(string firstName, string lastName, string email, string password)
     {
         var existingUser = await _userDal.GetByEmailAsync(email);
         if (existingUser != null)
         {
-            throw new Exception("User already exists");
+            throw new Exception("Email already exists.");
         }
 
         var role = await _roleDal.GetByNameAsync(UserRoleConstants.User);
@@ -56,32 +47,46 @@ public class UserManager : EntityManagerBase<User>, IUserService
             RoleId = role.Id,
             Role = role,
         };
-
         await _userDal.CreateAsync(user);
-        Console.WriteLine($"Generated User Id: {user.Id}");
 
         return user;
     }
 
     public async Task<string> LoginAsync(string email, string password)
     {
-        var user = await _userDal.GetByEmailAsync(email);
-        if (user == null)
-        {
-            throw new Exception("User not found.");
-        }
-
         var isPasswordValid = await ValidatePasswordAsync(email, password);
         if (!isPasswordValid)
         {
             throw new Exception("Invalid password.");
         }
 
+        var user = await _userDal.GetByEmailAsync(email);
         user.Role = await _roleDal.GetByIdAsync(user.RoleId);
 
         var token = _tokenGenerator.GenerateToken(user);
 
         return token;
+    }
+
+    public override async Task<List<User>> GetAllAsync()
+    {
+        var users = await _userDal.GetAllAsync();
+        foreach (var user in users)
+        {
+            user.Role = await _roleDal.GetByIdAsync(user.RoleId);
+        }
+        return users;
+    }
+
+    public override async Task<User> GetByIdAsync(string id)
+    {
+        var user = await _userDal.GetByIdAsync(id);
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+        user.Role = await _roleDal.GetByIdAsync(user.RoleId);
+        return user;
     }
 
     public async Task<bool> ValidatePasswordAsync(string email, string password)
@@ -113,26 +118,5 @@ public class UserManager : EntityManagerBase<User>, IUserService
 
         user.Password = _passwordHasher.HashPassword(user, newPassword);
         await _userDal.UpdateAsync(user);
-    }
-
-    public override async Task<List<User>> GetAllAsync()
-    {
-        var users = await _userDal.GetAllAsync();
-        foreach (var user in users)
-        {
-            user.Role = await _roleDal.GetByIdAsync(user.RoleId);
-        }
-        return users;
-    }
-
-    public override async Task<User> GetByIdAsync(string id)
-    {
-        var user = await _userDal.GetByIdAsync(id);
-        if (user == null)
-        {
-            throw new Exception("User not found.");
-        }
-        user.Role = await _roleDal.GetByIdAsync(user.RoleId);
-        return user;
     }
 }

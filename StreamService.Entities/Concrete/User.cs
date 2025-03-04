@@ -18,6 +18,8 @@ public class User : BaseEntity
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
 
+    public string NickName => Email != null && Email.Contains("@") ? Email.Substring(0, Email.IndexOf('@')) : Email;
+
     [EmailAddress]
     [Required]
     public string Email { get; set; } = default!;
@@ -32,9 +34,12 @@ public class User : BaseEntity
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string? MembershipId { get; set; }
+
+    [BsonIgnore]
     public Membership? Membership { get; set; }
 
-    public List<StreamInformation>? StreamInformations { get; set; }
+    [BsonRepresentation(BsonType.ObjectId)]
+    public List<string>? StreamInformationsIds { get; set; }
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string RoleId { get; set; } = default!;

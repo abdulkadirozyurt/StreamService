@@ -11,23 +11,6 @@ public abstract class EntityRepositoryBase<TEntity, TContext>(TContext context) 
 {
     private readonly TContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
-    public async Task<TEntity> CreateAsync(TEntity entity)
-    {
-        var entry = _context.Set<TEntity>().Add(entity);
-        await _context.SaveChangesAsync();
-        return entry.Entity;
-    }
-
-    public async Task<bool> DeleteAsync(string id)
-    {
-        var entity = _context.Set<TEntity>().Find(id);
-        if (entity == null)
-            return false;
-        _context.Set<TEntity>().Remove(entity);
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
     public virtual async Task<List<TEntity>> GetAllAsync()
     {
         return await _context.Set<TEntity>().ToListAsync();
@@ -43,10 +26,39 @@ public abstract class EntityRepositoryBase<TEntity, TContext>(TContext context) 
         return entity;
     }
 
-    public async Task<TEntity> UpdateAsync(TEntity entity)
+    public virtual async Task<TEntity> CreateAsync(TEntity entity)
+    {
+        var entry = _context.Set<TEntity>().Add(entity);
+        await _context.SaveChangesAsync();
+        return entry.Entity;
+    }
+
+    public virtual async Task<TEntity> UpdateAsync(TEntity entity)
     {
         var entry = _context.Set<TEntity>().Update(entity);
         await _context.SaveChangesAsync();
         return entry.Entity;
+    }
+
+    public virtual async Task<bool> DeactivateAsync(string id)
+    {
+        var entity = await _context.Set<TEntity>().FindAsync(id);
+        if (entity == null)
+            return false;
+        entity.IsActive = false;
+        _context.Set<TEntity>().Update(entity);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public virtual async Task<bool> ActivateAsync(string id)
+    {
+        var entity = await _context.Set<TEntity>().FindAsync(id);
+        if (entity == null)
+            return false;
+        entity.IsActive = true;
+        _context.Set<TEntity>().Update(entity);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

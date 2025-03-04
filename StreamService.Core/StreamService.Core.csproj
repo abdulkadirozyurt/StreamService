@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Folder Include="DataAccess\Abstract\" />
+    <Folder Include="Entities\Constants\User\" />
   </ItemGroup>
 
 </Project>
