@@ -1,13 +1,12 @@
-using System;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using StreamService.Business.Abstract;
 using StreamService.Business.Concrete;
-using StreamService.DataAccess.Abstract;
-using StreamService.DataAccess.Concrete.EntityFramework;
+using StreamService.Entities.Concrete;
 
 namespace StreamService.Business;
 
@@ -15,10 +14,13 @@ public static class ConfigureBusinessServices
 {
     public static IServiceCollection RegisterBusinessServices(this IServiceCollection services)
     {
+        services.AddScoped<PasswordHasher<User>>();
+        services.AddScoped<IAuthService, AuthManager>();
         services.AddScoped<IUserService, UserManager>();
         services.AddScoped<ITokenService, TokenManager>();
-        services.AddScoped<ITokenGenerator, TokenGenerator>();
         services.AddHostedService<RoleSeederHostedService>();
+        services.AddScoped<ITokenGenerator, TokenGenerator>();
+        services.AddScoped<ISubscriptionService, SubscriptionManager>();
 
         return services;
     }

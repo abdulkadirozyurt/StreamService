@@ -1,7 +1,7 @@
 using StreamService.Core.DataAccess.Abstract;
 using StreamService.Entities.Concrete;
 
-public interface IMembershipDal : IEntityRepository<Membership>
+public interface ISubscriptionDal : IEntityRepository<Subscription>
 {
     // Define any additional methods specific to Membership if needed
 }

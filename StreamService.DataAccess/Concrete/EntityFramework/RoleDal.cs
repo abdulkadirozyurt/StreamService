@@ -22,5 +22,4 @@ public class RoleDal(MongoDbContext context) : EntityRepositoryBase<Role, MongoD
         }
         return role;
     }
-
 }

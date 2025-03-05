@@ -12,7 +12,7 @@ public class MongoDbContext(DbContextOptions<MongoDbContext> options, MongoDbSet
 
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
-    public DbSet<Membership> Memberships { get; set; }
+    public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<StreamInformation> StreamInformations { get; set; }
 
@@ -22,10 +22,10 @@ public class MongoDbContext(DbContextOptions<MongoDbContext> options, MongoDbSet
 
         modelBuilder.Entity<User>().ToCollection("users");
         modelBuilder.Entity<Role>().ToCollection("roles");
-        modelBuilder.Entity<Membership>().ToCollection("memberships");
+        modelBuilder.Entity<Subscription>().ToCollection("subscriptions");
         modelBuilder.Entity<RefreshToken>().ToCollection("refreshTokens");
         modelBuilder.Entity<StreamInformation>().ToCollection("streamInformations");
 
-        modelBuilder.Entity<User>().HasOne(u => u.Membership).WithMany(m => m.Users).HasForeignKey(u => u.MembershipId).IsRequired(false);
+        modelBuilder.Entity<User>().HasOne(u => u.Subscription).WithMany(m => m.Users).HasForeignKey(u => u.SubscriptionId).IsRequired(false);
     }
 }

@@ -16,14 +16,5 @@ public class UserDal(MongoDbContext context) : EntityRepositoryBase<User, MongoD
         return await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
     }
 
-    public async Task<bool> DeactivateAsync(string id)
-    {
-        var user = await _context.Users.FindAsync(id);
-        if (user == null)
-            return false;
-        user.IsActive = false;
-        _context.Users.Update(user);
-        await _context.SaveChangesAsync();
-        return true;
-    }
+    
 }

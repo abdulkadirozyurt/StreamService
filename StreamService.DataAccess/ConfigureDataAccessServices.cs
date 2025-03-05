@@ -30,6 +30,7 @@ public static class ConfigureDataAccessServices
         services.AddScoped<IStreamInformationDal, StreamInformationDal>();
         services.AddScoped<IRoleDal, RoleDal>();
         services.AddScoped<IRefreshTokenDal, RefreshTokenDal>();
+        services.AddScoped<ISubscriptionDal, SubscriptionDal>();
 
         return services;
     }

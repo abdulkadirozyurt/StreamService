@@ -7,5 +7,4 @@ namespace StreamService.DataAccess.Abstract;
 public interface IUserDal : IEntityRepository<User>
 {
     Task<User> GetByEmailAsync(string email);
-    Task<bool> DeactivateAsync(string id);
 }

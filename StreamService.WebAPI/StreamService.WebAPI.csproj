@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\StreamService.Business\StreamService.Business.csproj" />
     <ProjectReference Include="..\StreamService.DataAccess\StreamService.DataAccess.csproj" />
   </ItemGroup>

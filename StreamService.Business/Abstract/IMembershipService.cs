@@ -1,4 +1,4 @@
 using StreamService.Core.Business.Abstract;
 using StreamService.Entities.Concrete;
 
-public interface IMembershipService : IEntityService<Membership> { }
+public interface ISubscriptionService : IEntityService<Subscription> { }

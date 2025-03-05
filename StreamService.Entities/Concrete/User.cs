@@ -33,10 +33,10 @@ public class User : BaseEntity
     public string Password { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
-    public string? MembershipId { get; set; }
+    public string? SubscriptionId { get; set; }
 
     [BsonIgnore]
-    public Membership? Membership { get; set; }
+    public Subscription? Subscription { get; set; }
 
     [BsonRepresentation(BsonType.ObjectId)]
     public List<string>? StreamInformationsIds { get; set; }
