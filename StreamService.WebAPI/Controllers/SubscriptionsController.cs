@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using StreamService.Business.Abstract;
 using StreamService.Entities.Concrete;
 
-[Route("api/memberships")]
+[Route("api/subscriptions")]
 [ApiController]
 public class SubscriptionsController : ControllerBase
 {
@@ -16,19 +16,19 @@ public class SubscriptionsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var memberships = await _subscriptionService.GetAllAsync();
-        return Ok(memberships);
+        var subscriptions = await _subscriptionService.GetAllAsync();
+        return Ok(subscriptions);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id)
     {
-        var membership = await _subscriptionService.GetByIdAsync(id);
-        if (membership == null)
+        var subscription = await _subscriptionService.GetByIdAsync(id);
+        if (subscription == null)
         {
             return NotFound();
         }
-        return Ok(membership);
+        return Ok(subscription);
     }
 
     [HttpPost]
@@ -45,8 +45,8 @@ public class SubscriptionsController : ControllerBase
         {
             return BadRequest("ID mismatch");
         }
-        var updatedMembership = await _subscriptionService.UpdateAsync(subscription);
-        return Ok(updatedMembership);
+        var updatedSubscription = await _subscriptionService.UpdateAsync(subscription);
+        return Ok(updatedSubscription);
     }
 
     [HttpDelete("{id}")]
