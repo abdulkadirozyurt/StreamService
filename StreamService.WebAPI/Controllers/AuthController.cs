@@ -3,11 +3,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StreamService.Business.Abstract;
 using StreamService.Entities.Dtos.User;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace StreamService.WebAPI.Controllers
 {
+    /// <summary>
+    /// Authentication Operations
+    /// </summary>
     [Route("api/auth")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "v1")]
+    [SwaggerTag("Authentication Operations")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -22,6 +28,7 @@ namespace StreamService.WebAPI.Controllers
         }
 
         [HttpPost("register")]
+        [SwaggerOperation(Summary = "Register a new user")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto userRegisterDto)
         {
             try
@@ -36,6 +43,7 @@ namespace StreamService.WebAPI.Controllers
         }
 
         [HttpPost("login")]
+        [SwaggerOperation(Summary = "Login a user")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
             try
@@ -51,6 +59,7 @@ namespace StreamService.WebAPI.Controllers
 
         [HttpPost("update-password")]
         [Authorize(Roles = "Admin,User")]
+        [SwaggerOperation(Summary = "Update user password")]
         public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto updatePasswordDto)
         {
             try
@@ -65,6 +74,7 @@ namespace StreamService.WebAPI.Controllers
         }
 
         [HttpPost("refresh-token")]
+        [SwaggerOperation(Summary = "Refresh access token")]
         public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
         {
             var token = _tokenService.GetRefreshToken(refreshToken);

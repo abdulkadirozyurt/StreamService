@@ -10,24 +10,26 @@ using StreamService.Core.Entities;
 
 namespace StreamService.Entities.Concrete;
 
-[Index(nameof(PublishPassphrase), IsUnique = true)]
-[Index(nameof(WatchPassphrase), IsUnique = true)]
+[Index(nameof(IngestKey), IsUnique = true)]
+[Index(nameof(WatchKey), IsUnique = true)]
 public class StreamInformation : BaseEntity
 {
-    public string HostAddress { get; set; }
-    public string PublishPassphrase { get; set; } = default!;
-    public string WatchPassphrase { get; set; } = default!;
+    public string HostAddress { get; set; } = default!;
+    public string IngestKey { get; set; } = default!;
+    public string WatchKey { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
-    public string UserId { get; set; }
+    public string UserId { get; set; } = default!;
 
     [BsonIgnore]
     public User User { get; set; }
 
     // Hesaplanmış özellikler ile formatı dinamik üretelim.
     [BsonIgnore] // <path>
-    public string ComputedIngestUrl => $"srt://{HostAddress}:4000?streamid=publish:{User.NickName}&passphrase={PublishPassphrase}";
+    // public string ComputedIngestUrl => $"srt://{HostAddress}:4000?streamid=publish:{User.NickName}&passphrase={PublishKey}";
+    public string ComputedIngestUrl => $"srt://{HostAddress}:4000?streamid={IngestKey}";
 
     [BsonIgnore]
-    public string ComputedWatchUrl => $"srt://{HostAddress}:4000?streamid=read:{User.NickName}&passphrase={WatchPassphrase}";
+    // public string ComputedWatchUrl => $"srt://{HostAddress}:4000?streamid=read:{User.NickName}&passphrase={WatchKey}";
+    public string ComputedWatchUrl => $"srt://{HostAddress}:4000?streamid={WatchKey}";
 }

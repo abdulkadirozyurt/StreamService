@@ -21,6 +21,7 @@ public static class ConfigureBusinessServices
         services.AddHostedService<RoleSeederHostedService>();
         services.AddScoped<ITokenGenerator, TokenGenerator>();
         services.AddScoped<ISubscriptionService, SubscriptionManager>();
+        services.AddScoped<IUserSubscriptionService, UserSubscriptionManager>();
 
         return services;
     }

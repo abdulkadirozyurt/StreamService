@@ -31,6 +31,7 @@ public static class ConfigureDataAccessServices
         services.AddScoped<IRoleDal, RoleDal>();
         services.AddScoped<IRefreshTokenDal, RefreshTokenDal>();
         services.AddScoped<ISubscriptionDal, SubscriptionDal>();
+        services.AddScoped<IUserSubscriptionDal, UserSubscriptionDal>();
 
         return services;
     }
